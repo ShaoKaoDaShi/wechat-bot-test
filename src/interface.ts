@@ -1,4 +1,4 @@
-import {ChatCompletionRequestMessage} from "openai";
+import { ChatCompletionMessageParam} from "openai/resources";
 
 export interface IConfig {
   api?: string;
@@ -13,5 +13,7 @@ export interface IConfig {
 }
 export interface User {
   username: string,
-  chatMessage: Array<ChatCompletionRequestMessage>,
+  chatMessage: ChatCompletionMessageParam[],
 }
+
+export type ChatMessage = ChatCompletionMessageParam;

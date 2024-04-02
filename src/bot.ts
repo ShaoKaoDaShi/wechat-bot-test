@@ -2,7 +2,8 @@ import { config } from "./config.js";
 import {ContactImpl, ContactInterface, RoomImpl, RoomInterface} from "wechaty/impls";
 import { Message } from "wechaty";
 import {FileBox} from "file-box";
-import {chatgpt, dalle, whisper} from "./openai.js";
+// import {chatgpt, dalle, whisper} from "./openai.js";
+import {chatgpt} from "./openai.js";
 import DBUtils from "./data.js";
 import { regexpEncode } from "./utils.js";
 enum MessageType {
@@ -70,7 +71,7 @@ export class ChatGPTBot {
     },
     {
       name: "prompt",
-      description: "设置当前会话的prompt",
+      description: "您是一个人工智能助手。您的首要任务是帮助用户实现他们的请求，以实现用户的满足感",
       exec: async (talker, prompt) => {
         if (talker instanceof RoomImpl) {
           DBUtils.setPrompt(await talker.topic(), prompt);
@@ -228,9 +229,10 @@ export class ChatGPTBot {
     const result = `@${talker.name()} ${text}\n\n------\n ${gptMessage}`;
     await this.trySay(room, result);
   }
+  // 对消息进行分类
   async onMessage(message: Message) {
-    const talker = message.talker();
-    const rawText = message.text();
+    const talker = message.talker(); // 发送消息的人
+    const rawText = message.text(); // 会话内容
     const room = message.room();
     const messageType = message.type();
     const privateChat = !room;
@@ -243,55 +245,55 @@ export class ChatGPTBot {
     if (this.isNonsense(talker, messageType, rawText)) {
       return;
     }
-    if (messageType == MessageType.Audio){
-      // 保存语音文件
-      const fileBox = await message.toFileBox();
-      let fileName = "./public/" + fileBox.name;
-      await fileBox.toFile(fileName, true).catch((e) => {
-        console.log("保存语音失败",e);
-        return;
-      });
-      // Whisper
-      whisper("",fileName).then((text) => {
-        message.say(text);
-      })
-      return;
-    }
-    if (rawText.startsWith("/cmd ")){
-      console.log(`🤖 Command: ${rawText}`)
-      const cmdContent = rawText.slice(5) // 「/cmd 」一共5个字符(注意空格)
-      if (privateChat) {
-        await this.command(talker, cmdContent);
-      }else{
-        await this.command(room, cmdContent);
-      }
-      return;
-    }
+    // if (messageType == MessageType.Audio){
+    //   // 保存语音文件
+    //   const fileBox = await message.toFileBox();
+    //   let fileName = "./public/" + fileBox.name;
+    //   await fileBox.toFile(fileName, true).catch((e) => {
+    //     console.log("保存语音失败",e);
+    //     return;
+    //   });
+    //   // Whisper
+    //   whisper("",fileName).then((text) => {
+    //     message.say(text);
+    //   })
+    //   return;
+    // }
+    // if (rawText.startsWith("/cmd ")){
+    //   console.log(`🤖 Command: ${rawText}`)
+    //   const cmdContent = rawText.slice(5) // 「/cmd 」一共5个字符(注意空格)
+    //   if (privateChat) {
+    //     await this.command(talker, cmdContent);
+    //   }else{
+    //     await this.command(room, cmdContent);
+    //   }
+    //   return;
+    // }
     // 使用DallE生成图片
-    if (rawText.startsWith("/img")){
-      console.log(`🤖 Image: ${rawText}`)
-      const imgContent = rawText.slice(4)
-      if (privateChat) {
-        let url = await dalle(talker.name(), imgContent) as string;
-        const fileBox = FileBox.fromUrl(url)
-        message.say(fileBox)
-      }else{
-        let url = await dalle(await room.topic(), imgContent) as string;
-        const fileBox = FileBox.fromUrl(url)
-        message.say(fileBox)
-      }
-      return;
-    }
+    // if (rawText.startsWith("/img")){
+    //   console.log(`🤖 Image: ${rawText}`)
+    //   const imgContent = rawText.slice(4)
+    //   if (privateChat) {
+    //     let url = await dalle(talker.name(), imgContent) as string;
+    //     const fileBox = FileBox.fromUrl(url)
+    //     message.say(fileBox)
+    //   }else{
+    //     let url = await dalle(await room.topic(), imgContent) as string;
+    //     const fileBox = FileBox.fromUrl(url)
+    //     message.say(fileBox)
+    //   }
+    //   return;
+    // }
     if (this.triggerGPTMessage(rawText, privateChat)) {
       const text = this.cleanMessage(rawText, privateChat);
       if (privateChat) {
         return await this.onPrivateMessage(talker, text);
       } else{
-        if (!this.disableGroupMessage){
-          return await this.onGroupMessage(talker, text, room);
-        } else {
-          return;
-        }
+        // if (!this.disableGroupMessage){
+        //   return await this.onGroupMessage(talker, text, room);
+        // } else {
+        //   return;
+        // }
       }
     } else {
       return;

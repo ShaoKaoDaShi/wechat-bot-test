@@ -6,7 +6,8 @@
   "export": "dist/main.js",
   "scripts": {
     "dev": "nodemon --exec node --loader ts-node/esm src/main.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "dev:test": "nodemon --exec node --loader ts-node/esm src/qwen.ts"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +16,7 @@
     "dotenv": "^16.0.3",
     "execa": "^6.1.0",
     "gpt3-tokenizer": "^1.1.5",
-    "openai": "^3.2.1",
+    "openai": "^4.29.2",
     "qrcode": "^1.5.1",
     "uuid": "^9.0.0",
     "wechaty": "^1.20.2",

@@ -1,6 +1,8 @@
-import {ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum} from "openai";
-import {User} from "./interface";
+// import {ChatCompletionRequestMessageRoleEnum} from "openai";
+import { ChatCompletionMessageParam } from "openai/resources";
+import {ChatMessage, User} from "./interface";
 import {isTokenOverLimit} from "./utils.js";
+enum ChatCompletionRequestMessageRoleEnum {System = "system",User= "user" ,Assistant = "assistant"};
 
 /**
  * 使用内存作为数据库
@@ -44,7 +46,7 @@ class DB {
    * 获取用户的聊天记录
    * @param username
    */
-  public getChatMessage(username: string): Array<ChatCompletionRequestMessage> {
+  public getChatMessage(username: string): Array<ChatCompletionMessageParam> {
     return this.getUserByUsername(username).chatMessage;
   }
 
